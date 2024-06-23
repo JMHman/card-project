@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block style %}
+    <style>
+        #background-jmh {
+            background-color: rgba(255, 255, 255, 0.8);
+            width: 500px;
+            height: 700px;
+            max-height: 2500px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 20px auto; /* Center the form */
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid black;
+        }
+
+        td, tr {
+            border: 1px solid black !important;
+            padding: 2px;
+        }
+
+        th {
+            text-align: center !important;
+            width: 60px;
+        }
+
+        button {
+            margin-top: 10px;
+        }
+
+        strong {
+            text-align: center;
+        }
+
+        .d-flex {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #stamp {
+            width: 90px;
+            height: 90px;
+        {#position: absolute;#}{#bottom: 20px;#}{#right: 20px;#} display: none; /* Initially hidden */
+            opacity: 0;
+            transform: scale(0);
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        input {
+            border: none;
+            width: 100%;
+        }
+
+        #stamp.show {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="background-jmh">
+        <h2 style="text-align: center;"> - 회원가입 신청서 - </h2>
+        <form id="sign-up-form" method="post" action="{% url 'sign-up' %}">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    <th>이름</th>
+                    <td colspan="2"><input type="text" name="name" placeholder="Name"></td>
+                </tr>
+                <tr>
+                    <th>이메일</th>
+                    <td colspan="2"><input type="email" name="email" placeholder="Email"></td>
+                </tr>
+                <tr>
+                    <th>비밀번호</th>
+                    <td colspan="2"><input type="password" name="password" placeholder="Password"></td>
+                </tr>
+                <tr>
+                    <th>비밀번호</th>
+                    <td colspan="2"><input type="password" name="confirm_password" placeholder="Password 확인"></td>
+                </tr>
+
+                <tbody id="urls-container">
+                <tr class="url-item">
+                    <td><input type="text" name="urls-0-url_name" placeholder="URL 이름" style="width: 100px;"></td>
+                    <td><input type="url" name="urls-0-url" placeholder="URL"></td>
+                    <td style="width: 80px">
+                        <button type="button" class="btn add-url" style="font-size: 12px"><strong>URL 추가</strong>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+
+
+                <tbody id="numbers-container">
+                <tr class="number-item">
+                    <td><input type="text" name="numbers-0-number_name" placeholder="번호 종류" style="width: 100px;"></td>
+                    <td><input type="text" name="numbers-0-number" placeholder="번호 입력"></td>
+                    <td style="width: 80px;">
+                        <button type="button" class="btn add-number" style="font-size: 12px"><strong>번호 추가</strong>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <br>
+            <div class="d-flex justify-content-end">
+                <table style="width: 76px !important;">
+                    <tr>
+                        <th style="text-align: center">결재 확인</th>
+                    </tr>
+                    <tr style="height: 70px !important; position: relative;">
+                        <td style="position: relative;">
+                            <img id="stamp" src="{% static '참잘했어요.png' %}" alt="Stamp"
+                                 style="position: absolute; top: -7px; left: -5px;">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <br>
+            <div>
+                <div style="position: absolute; top: 300px;">
+                    <p>URL은 본인 소개를 위한 정보를 입력하시면 됩니다.</p>
+                    <p>번호는 본인 휴대폰/회사 연락처 등등을 입력하시면 됩니다. </p>
+                    <p>자기 소개용 URL 과 전화번호는</p>
+                    <p>마이페이지에서도 추가/수정이 가능합니다.</p>
+                    <p>입력이 끝나셨다면 결제 요청을 눌러주세요.</p>
+                </div>
+            </div>
+            <div class="position-absolute bottom-0 start-50 translate-middle-x" style="margin-bottom: 40px">
+                <button class="btn" type="submit" style="font-size: 20px">- 결제 요청 -</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        let urlIndex = 1;
+        let numberIndex = 1;
+
+
+        document.getElementById('urls-container').addEventListener('click', function (e) {
+            console.log('Container clicked');
+            if (e.target && e.target.classList.contains('add-url')) {
+                console.log('Add URL button clicked');
+                const container = document.getElementById('urls-container');
+                const newUrlItem = document.createElement('tr');
+                newUrlItem.className = 'url-item';
+                newUrlItem.innerHTML = `
+                <tr class="url-item">
+                    <td><input type="text" name="urls-0-url_name" placeholder="URL 이름" style="width: 100px;"></td>
+                    <td><input type="url" name="urls-0-url" placeholder="URL"></td>
+                    <td style="width: 80px">
+                        <button type="button" class="btn remove-url" style="font-size: 12px"><strong>URL 빼기</strong></button>
+                    </td>
+                </tr>
+                `;
+                container.appendChild(newUrlItem);
+                urlIndex++;
+            } else if (e.target && e.target.classList.contains('remove-url')) {
+                e.target.parentElement.parentElement.remove();
+            }
+        });
+
+        document.getElementById('numbers-container').addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('add-number')) {
+                const container = document.getElementById('numbers-container');
+                const newNumberItem = document.createElement('tr');
+                newNumberItem.className = 'number-item';
+                newNumberItem.innerHTML = `
+                <tr class="number-item">
+                    <td><input type="text" name="numbers-0-number_name" placeholder="번호 종류" style="width: 100px;"></td>
+                    <td><input type="text" name="numbers-0-number" placeholder="번호 입력"></td>
+                    <td style="width: 80px;">
+                        <button type="button" class="btn remove-number" style="font-size: 12px"><strong>번호 빼기</strong></button>
+                    </td>
+                </tr>
+                `;
+                container.appendChild(newNumberItem);
+                numberIndex++;
+            } else if (e.target && e.target.classList.contains('remove-number')) {
+                e.target.parentElement.parentElement.remove();
+            }
+        });
+
+        document.getElementById('sign-up-form').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent actual form submission
+
+            const stamp = document.getElementById('stamp');
+            stamp.classList.add('show');
+
+            setTimeout(() => {
+                this.submit(); // Submit the form after the animation
+            }, 2000); // Delay adjusted to 2 seconds
+        });
+    </script>
+{% endblock %}

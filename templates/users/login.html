@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+    <div class="business-card">
+        <h2>Login</h2>
+        <form id="login-form" method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="d-flex justify-content-between">
+                <div>
+                    <label for="email">Email:</label><br>
+                    <input type="email" id="email" name="email" required><br><br>
+                    <label for="password">Password:</label><br>
+                    <input type="password" id="password" name="password" required><br><br>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-outline-secondary" style="margin-top: 20px; margin-right: 10px; height: 110px; writing-mode: vertical-rl;">로그인</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = {
+                email: formData.get('email'),
+                password: formData.get('password'),
+            };
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // 로그인 성공 시 토큰과 유저 데이터를 로컬 저장소에 저장
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+
+                    // personal_code를 이용하여 리디렉션
+                    const personalCode = result.personal_code;
+                    window.location.href = `/detail/${personalCode}/`;
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+{% endblock %}

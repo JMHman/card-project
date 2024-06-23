@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}회원 정보 수정{% endblock %}
+
+{% block style %}
+    <style>
+        #background-jmh {
+            background-color: rgba(255, 255, 255, 0.8);
+            width: 500px;
+            height: 700px;
+            max-height: 2500px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 20px auto; /* Center the form */
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid black;
+        }
+
+        td, tr {
+            border: 1px solid black !important;
+            padding: 2px;
+        }
+
+        th {
+            text-align: center !important;
+            width: 60px;
+        }
+
+        button {
+            margin-top: 10px;
+        }
+
+        strong {
+            text-align: center;
+        }
+
+        .d-flex {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #stamp {
+            width: 90px;
+            height: 90px;
+            display: none; /* Initially hidden */
+            opacity: 0;
+            transform: scale(0);
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        input {
+            border: none;
+            width: 100%;
+        }
+
+        textarea {
+            border: none;
+            width: 100%;
+        }
+
+        #stamp.show {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="background-jmh">
+        <div id="page-1" class="page">
+            <h2 style="text-align: center;"> - 회원정보 수정 신청서 - </h2>
+            <form id="update-form" method="put" action="{% url 'user-update' personal_code=personal_code %}">
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <th>이름</th>
+                        <td colspan="2"><a name="name" placeholder="Name" readonly>{{ user.name }}</a></td>
+                    </tr>
+                    <tr>
+                        <th>이메일</th>
+                        <td colspan="2"><a name="email" placeholder="Email" readonly>{{ user.email }}</a></td>
+                    </tr>
+                    <tr>
+                        <th>비밀번호</th>
+                        <td colspan="2"><input type="password" name="password" placeholder="Password"></td>
+                    </tr>
+                    <tr>
+                        <th>비밀번호 확인</th>
+                        <td colspan="2"><input type="password" name="confirm_password" placeholder="Password 확인"></td>
+                    </tr>
+                    <tbody id="urls-container">
+                    {% for url in user.urls %}
+                        <tr class="url-item">
+                            <td><input type="text" name="urls-{{ forloop.counter0 }}-url_name" placeholder="URL 이름"
+                                       value="{{ url.url_name }}" style="width: 100px;"></td>
+                            <td><input type="url" name="urls-{{ forloop.counter0 }}-url" placeholder="URL"
+                                       value="{{ url.url }}"></td>
+                            <td style="width: 80px">
+                                <button type="button" class="btn remove-url" style="font-size: 12px"><strong>URL
+                                    제거</strong>
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr class="url-item">
+                        <td><input type="text" name="urls-{{ user.urls|length }}-url_name" placeholder="URL 이름"
+                                   style="width: 100px;"></td>
+                        <td><input type="url" name="urls-{{ user.urls|length }}-url" placeholder="URL"></td>
+                        <td style="width: 80px">
+                            <button type="button" class="btn add-url" style="font-size: 12px"><strong>URL 추가</strong>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                    </tbody>
+                    <tbody id="numbers-container">
+                    {% for number in user.numbers %}
+                        <tr class="number-item">
+                            <td><input type="text" name="numbers-{{ forloop.counter0 }}-number_name" placeholder="번호 종류"
+                                       value="{{ number.number_name }}" style="width: 100px;"></td>
+                            <td><input type="text" name="numbers-{{ forloop.counter0 }}-number" placeholder="번호 입력"
+                                       value="{{ number.number }}"></td>
+                            <td style="width: 80px;">
+                                <button type="button" class="btn remove-number" style="font-size: 12px"><strong>번호
+                                    제거</strong></button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr class="number-item">
+                        <td><input type="text" name="numbers-{{ user.numbers|length }}-number_name" placeholder="번호 종류"
+                                   style="width: 100px;"></td>
+                        <td><input type="text" name="numbers-{{ user.numbers|length }}-number" placeholder="번호 입력"></td>
+                        <td style="width: 80px;">
+                            <button type="button" class="btn add-number" style="font-size: 12px"><strong>번호 추가</strong>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+
+
+        <!-- 기본 프로젝트 데이터 페이지들 -->
+        {% for project in user.projects %}
+            <div id="page-{{ forloop.counter|add:1 }}" class="page">
+                <h2 style="text-align: center;"> - 프로젝트 {{ forloop.counter }} - </h2>
+                <form method="put">
+                    {% csrf_token %}
+                    <table>
+                        <tr>
+                            <th>프로젝트 이름</th>
+                            <td colspan="2"><input type="text" name="project_name_{{ forloop.counter }}"
+                                                   placeholder="프로젝트 이름"
+                                                   value="{{ project.title }}"></td>
+                        </tr>
+                        <tr>
+                            <th>프로젝트 설명</th>
+                            <td colspan="2"><textarea name="project_description_{{ forloop.counter }}"
+                                                      placeholder="프로젝트 설명">{{ project.description }}</textarea></td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+        {% endfor %}
+
+
+        <!-- New pages will be inserted here -->
+        <div id="additional-pages"></div>
+
+        <div class="pagination-buttons">
+            <button type="button" id="prev-page" class="btn" style="font-size: 20px">이전 페이지</button>
+            <span id="current-page" style="font-size: 20px">1</span>
+            <button type="button" id="next-page" class="btn" style="font-size: 20px">다음 페이지</button>
+        </div>
+
+        <!-- 저장 버튼 -->
+        <div class="save-button">
+            <button type="button" id="save-button" class="btn" style="font-size: 20px">저장</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        let urlIndex = 1;
+        let numberIndex = 1;
+        let currentPage = 1;
+        const maxPage = 10;  // Adjust as necessary
+
+        document.getElementById('urls-container').addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('add-url')) {
+                const container = document.getElementById('urls-container');
+                const newUrlItem = document.createElement('tr');
+                newUrlItem.className = 'url-item';
+                newUrlItem.innerHTML = `
+                <tr class="url-item">
+                    <td><input type="text" name="urls-${urlIndex}-url_name" placeholder="URL 이름" style="width: 100px;"></td>
+                    <td><input type="url" name="urls-${urlIndex}-url" placeholder="URL"></td>
+                    <td style="width: 80px">
+                        <button type="button" class="btn remove-url" style="font-size: 12px"><strong>URL 빼기</strong></button>
+                    </td>
+                </tr>
+                `;
+                container.appendChild(newUrlItem);
+                urlIndex++;
+            } else if (e.target && e.target.classList.contains('remove-url')) {
+                e.target.parentElement.parentElement.remove();
+            }
+        });
+
+        document.getElementById('numbers-container').addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('add-number')) {
+                const container = document.getElementById('numbers-container');
+                const newNumberItem = document.createElement('tr');
+                newNumberItem.className = 'number-item';
+                newNumberItem.innerHTML = `
+                <tr class="number-item">
+                    <td><input type="text" name="numbers-${numberIndex}-number_name" placeholder="번호 종류" style="width: 100px;"></td>
+                    <td><input type="text" name="numbers-${numberIndex}-number" placeholder="번호 입력"></td>
+                    <td style="width: 80px;">
+                        <button type="button" class="btn remove-number" style="font-size: 12px"><strong>번호 빼기</strong></button>
+                    </td>
+                </tr>
+                `;
+                container.appendChild(newNumberItem);
+                numberIndex++;
+            } else if (e.target && e.target.classList.contains('remove-number')) {
+                e.target.parentElement.parentElement.remove();
+            }
+        });
+
+        document.getElementById('update-form').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent actual form submission
+
+            const stamp = document.getElementById('stamp');
+            stamp.classList.add('show');
+
+            setTimeout(() => {
+                this.submit(); // Submit the form after the animation
+            }, 2000); // Delay adjusted to 2 seconds
+        });
+
+        document.getElementById('next-page').addEventListener('click', function () {
+            if (currentPage < maxPage) {
+                currentPage++;
+                showPage(currentPage);
+            }
+        });
+
+        document.getElementById('prev-page').addEventListener('click', function () {
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        });
+
+        function showPage(pageNumber) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+
+            // Show the current page
+            const currentPageElement = document.getElementById(`page-${pageNumber}`);
+            if (currentPageElement) {
+                currentPageElement.classList.remove('hidden');
+            } else {
+                // If the current page element doesn't exist, create it
+                const newPage = document.createElement('div');
+                newPage.id = `page-${pageNumber}`;
+                newPage.className = 'page';
+                newPage.innerHTML = `
+                    <h2 style="text-align: center;"> - 프로젝트 페이지 ${pageNumber - 1} - </h2>
+                    <form method="post">
+                        <table>
+                            <tr>
+                                <th>프로젝트 이름</th>
+                                <td colspan="2"><input type="text" name="project_name_${pageNumber}" placeholder="프로젝트 이름"></td>
+                            </tr>
+                            <tr>
+                                <th>프로젝트 설명</th>
+                                <td colspan="2"><textarea name="project_description_${pageNumber}" placeholder="프로젝트 설명" style="width: 100%"></textarea></td>
+                            </tr>
+                        </table>
+                    </form>
+                `;
+                document.getElementById('additional-pages').appendChild(newPage);
+            }
+        }
+
+        showPage(currentPage);  // Show the first page initially
+
+        document.getElementById('save-button').addEventListener('click', () => {
+            // Collect data for PUT request
+            const updateForm = document.getElementById('update-form');
+            const updateData = new FormData(updateForm);
+
+            fetch("{% url 'user-update' personal_code=personal_code %}", {
+                method: 'PUT',
+                body: updateData,
+                headers: {
+                    'X-CSRFToken': updateForm.querySelector('input[name="csrfmiddlewaretoken"]').value
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to update user data');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('User data updated successfully', data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+            // Collect data for project requests
+            const projectForms = document.querySelectorAll('.project-form');
+            projectForms.forEach((form, index) => {
+                const formData = new FormData(form);
+                const projectId = form.querySelector('input[name="project_id"]');
+
+                let method = 'POST';
+                let url = 'http://localhost:8000/api/v1/projects/';
+
+                if (projectId) {
+                    method = 'PUT';
+                    url += 'detail/' + projectId.value + '/';
+                }
+
+                fetch(url, {
+                    method: method,
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': form.querySelector('input[name="csrfmiddlewaretoken"]').value
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to save project data');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log(`Project ${index + 1} data saved successfully`, data);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+    </script>
+{% endblock %}

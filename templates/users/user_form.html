@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form method="post">
+        {% csrf_token %}
+        {{ user_form.as_p }}
+        {{ user_form.url.management_form }}
+        {% for url_form in user_form.url.forms %}
+            {{ url_form.as_p }}
+        {% endfor %}
+        {{ user_form.number.management_form }}
+        {% for number_form in user_form.number.forms %}
+            {{ number_form.as_p }}
+        {% endfor %}
+        <button type="submit">Save</button>
+    </form>
+
+
+</body>
+</html>
